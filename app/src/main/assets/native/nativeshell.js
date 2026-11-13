@@ -45,8 +45,9 @@ window.NativeShell = {
 
     // Bergafin: login pelo Authentik no navegador do sistema (volta por bergafin://login)
     Bergafin: {
-        login(serverAddress) {
-            window.NativeInterface.openUrl(serverAddress.replace(/\/+$/, "") + "/Bergafin/Login?mode=app");
+        // state: valor aleatório do web, que volta com o ticket (o web confere)
+        login(serverAddress, state) {
+            window.NativeInterface.openUrl(serverAddress.replace(/\/+$/, "") + "/Bergafin/Login?mode=app&state=" + encodeURIComponent(state || ""));
         }
     },
 

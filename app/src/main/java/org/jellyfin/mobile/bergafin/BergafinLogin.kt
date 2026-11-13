@@ -22,6 +22,7 @@ object BergafinLogin {
     private const val SCHEME = "bergafin"
     private const val HOST = "login"
     private val TICKET = Regex("^[A-Za-z0-9_-]{20,200}$")
+    private val STATE = Regex("^[A-Za-z0-9_-]{16,128}$")
 
     /** Trata o intent se for a volta do Authentik. */
     fun handle(activity: ComponentActivity, intent: Intent?) {
@@ -31,11 +32,13 @@ object BergafinLogin {
             Timber.w("Bergafin: volta do Authentik sem ticket válido")
             return
         }
+        // O state volta como foi gerado pelo web; o web confere se é o dele
+        val state = data.getQueryParameter("state")?.takeIf(STATE::matches).orEmpty()
         // Não tratar o mesmo intent de novo (ex.: rotação de tela)
         intent.data = null
 
         val channel = activity.get<WebappFunctionChannel>()
-        val js = "window.location.hash = '#/login?bergafinTicket=$ticket';"
+        val js = "window.location.hash = '#/login?bergafinTicket=$ticket&bergafinState=$state';"
         activity.lifecycleScope.launch {
             // O web pode ainda estar carregando (app aberto do zero pelo navegador)
             repeat(RETRIES) {
