@@ -1,0 +1,87 @@
+# Compila, assina e publica o Bergafin a cada push no main.
+# Versão: <versão oficial em que o main está baseado>-berga.<N>, ex.: v2.7.3-berga.4.
+# O app procura a release "latest" e se atualiza sozinho (bergafin/update).
+# Secrets: BERGAFIN_KEYSTORE (PKCS12 em base64) e BERGAFIN_KEYSTORE_PASSWORD.
+name: Bergafin - release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bergafin-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version-file: .tools-versions
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Versão
+        id: v
+        run: |
+          BASE=$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --exclude 'v*-berga.*' --abbrev=0 HEAD)
+          BASE=${BASE#v}
+          LAST=$(git tag -l "v$BASE-berga.*" --sort=-v:refname | head -1)
+          N=${LAST##*-berga.}
+          N=$(( ${N:-0} + 1 ))
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          echo "version=$BASE-berga.$N" >> "$GITHUB_OUTPUT"
+          echo "Versão: $BASE-berga.$N"
+
+      - name: Chave de assinatura
+        env:
+          KEYSTORE_BASE64: ${{ secrets.BERGAFIN_KEYSTORE }}
+        run: |
+          [ -n "$KEYSTORE_BASE64" ] || { echo "::error::Falta o secret BERGAFIN_KEYSTORE"; exit 1; }
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/bergafin.p12"
+
+      - name: Compilar
+        env:
+          JELLYFIN_VERSION: ${{ steps.v.outputs.version }}
+          KEYSTORE_FILE: ${{ runner.temp }}/bergafin.p12
+          KEYSTORE_PASSWORD: ${{ secrets.BERGAFIN_KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: bergafin
+          SIGNING_KEY_PASSWORD: ${{ secrets.BERGAFIN_KEYSTORE_PASSWORD }}
+        run: ./gradlew assembleProprietaryRelease
+
+      - name: Preparar arquivos
+        id: out
+        run: |
+          DIR=app/build/outputs/apk/proprietary/release
+          CODE=$(jq -r '.elements[0].versionCode' "$DIR/output-metadata.json")
+          mkdir -p "$RUNNER_TEMP/out"
+          cp "$DIR"/*.apk "$RUNNER_TEMP/out/Bergafin_${{ steps.v.outputs.version }}.apk"
+          printf '{"versionName":"%s","versionCode":%s}\n' "${{ steps.v.outputs.version }}" "$CODE" > "$RUNNER_TEMP/out/version.json"
+          cat "$RUNNER_TEMP/out/version.json"
+          # O APK tem que estar assinado com a nossa chave (o atualizador depende disso)
+          APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner"
+          "$APKSIGNER" verify --print-certs "$RUNNER_TEMP/out/"*.apk \
+            | grep -i "SHA-256 digest: 72c174cf8720eec988952f2f52c1a9bebddf0054e18864919f4493e622a358bc" \
+            || { echo "::error::APK não está assinado com a chave do Bergafin"; exit 1; }
+
+      - name: Publicar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BASE=${{ steps.v.outputs.base }}
+          gh release create "v${{ steps.v.outputs.version }}" "$RUNNER_TEMP"/out/* \
+            --target main --latest \
+            --title "Bergafin ${{ steps.v.outputs.version }}" \
+            --notes "Baseado no Jellyfin Android **v$BASE**. Novidades do oficial: https://github.com/jellyfin/jellyfin-android/releases/tag/v$BASE"
