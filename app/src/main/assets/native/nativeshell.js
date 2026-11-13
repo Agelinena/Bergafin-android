@@ -43,6 +43,13 @@ window.NativeShell = {
         window.NativeInterface.disableFullscreen();
     },
 
+    // Bergafin: login pelo Authentik no navegador do sistema (volta por bergafin://login)
+    Bergafin: {
+        login(serverAddress) {
+            window.NativeInterface.openUrl(serverAddress.replace(/\/+$/, "") + "/Bergafin/Login?mode=app");
+        }
+    },
+
     openUrl(url, target) {
         window.NativeInterface.openUrl(url);
     },

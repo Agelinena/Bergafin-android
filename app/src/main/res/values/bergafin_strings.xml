@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos do Bergafin (só português; ficam fora das traduções do projeto oficial) -->
+<resources>
+    <string name="bergafin_app_name" translatable="false">Bergafin</string>
+
+    <string name="bergafin_update_channel" translatable="false">Atualizações do Bergafin</string>
+    <string name="bergafin_update_title" translatable="false">Atualização do Bergafin</string>
+    <string name="bergafin_update_available_title" translatable="false">Bergafin %1$s disponível</string>
+    <string name="bergafin_update_available_text" translatable="false">Toque para baixar e instalar.</string>
+    <string name="bergafin_update_action" translatable="false">Atualizar</string>
+    <string name="bergafin_update_up_to_date" translatable="false">O Bergafin já está na versão mais recente.</string>
+    <string name="bergafin_update_check_failed" translatable="false">Não deu para procurar atualização. Confira a internet.</string>
+    <string name="bergafin_update_need_permission" translatable="false">Para atualizar sozinho, o Bergafin precisa da permissão "Instalar apps desconhecidos".</string>
+    <string name="bergafin_update_open_settings" translatable="false">Abrir configurações</string>
+    <string name="bergafin_update_downloading" translatable="false">Baixando a versão %1$s…</string>
+    <string name="bergafin_update_installing" translatable="false">Instalando…</string>
+    <string name="bergafin_update_failed" translatable="false">A atualização falhou: %1$s</string>
+    <string name="bergafin_update_failed_unknown" translatable="false">A atualização falhou.</string>
+    <string name="bergafin_cancel" translatable="false">Cancelar</string>
+    <string name="bergafin_close" translatable="false">Fechar</string>
+</resources>

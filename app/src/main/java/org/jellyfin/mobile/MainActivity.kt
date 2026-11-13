@@ -22,6 +22,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.jellyfin.mobile.bergafin.BergafinLogin
+import org.jellyfin.mobile.bergafin.update.BergafinUpdater
 import org.jellyfin.mobile.events.ActivityEventHandler
 import org.jellyfin.mobile.player.cast.Chromecast
 import org.jellyfin.mobile.player.cast.IChromecast
@@ -130,6 +132,10 @@ class MainActivity : AppCompatActivity() {
         // Subscribe to activity events
         with(activityEventHandler) { subscribe() }
 
+        // Bergafin: volta do login pelo Authentik e procura de atualização
+        BergafinLogin.handle(this, intent)
+        BergafinUpdater.schedule(this)
+
         // Load UI
         lifecycleScope.launch {
             mainViewModel.serverState.collectLatest { state ->
@@ -198,6 +204,12 @@ class MainActivity : AppCompatActivity() {
                 fragment.onUserLeaveHint()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Bergafin: volta do login pelo Authentik com o app já aberto
+        BergafinLogin.handle(this, intent)
     }
 
     override fun onStop() {

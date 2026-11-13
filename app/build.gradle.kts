@@ -33,8 +33,10 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
+        // Bergafin: outro ID (convive com o app oficial) e versionCode próprio (buildSrc/BergafinVersion.kt)
+        applicationId = "io.github.agelinena.bergafin"
         versionName = project.getVersionName()
-        versionCode = getVersionCode(versionName!!)
+        versionCode = bergafinVersionCode(versionName!!)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
