@@ -16,6 +16,11 @@
     <string name="bergafin_update_installing" translatable="false">Instalando…</string>
     <string name="bergafin_update_failed" translatable="false">A atualização falhou: %1$s</string>
     <string name="bergafin_update_failed_unknown" translatable="false">A atualização falhou.</string>
+    <string name="bergafin_update_check" translatable="false">Procurar atualização</string>
+    <string name="bergafin_update_installed" translatable="false">Versão instalada: %1$s</string>
+    <string name="bergafin_update_checking" translatable="false">Procurando atualização…</string>
+    <string name="bergafin_update_dialog_text" translatable="false">Quer baixar e instalar agora?</string>
+    <string name="bergafin_update_later" translatable="false">Depois</string>
     <string name="bergafin_cancel" translatable="false">Cancelar</string>
     <string name="bergafin_close" translatable="false">Fechar</string>
 </resources>
