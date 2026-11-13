@@ -814,7 +814,10 @@ final class ChromecastUtilities {
         if (metadata == null) metadata = new JSONObject();
         JSONObject textTrackStyle = mediaInfo.optJSONObject("textTrackStyle");
         if (textTrackStyle == null) textTrackStyle = new JSONObject();
-        return createMediaInfo(contentId, customData, contentType, duration, streamType, metadata, textTrackStyle);
+        // Bergafin: inclui as faixas de legenda (cast pelo Default Media Receiver)
+        return org.jellyfin.mobile.bergafin.cast.BergafinCastTracks.withTracks(
+                createMediaInfo(contentId, customData, contentType, duration, streamType, metadata, textTrackStyle),
+                mediaInfo.optJSONArray("tracks"));
     }
 
     static MediaInfo createMediaInfo(String contentId, JSONObject customData, String contentType, long duration, String streamType, JSONObject metadata, JSONObject textTrackStyle) {
